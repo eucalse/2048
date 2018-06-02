@@ -1,0 +1,506 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+<script type="text/javascript" src="jq.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<style type="text/css">
+*{
+	font-size: 20px;
+}
+div{
+	padding:20px;
+}
+body{
+
+}
+#container{
+	width: 600px;
+	height: 600px;
+	background-color: black;
+	margin: 0 auto;
+	margin-top: 100px;
+}
+#container>div{
+	background: #cac0b2;
+	float: left;
+	height: 25%;
+	border: 15px #b8af9e solid;
+	padding:0px;
+}
+#buttonArea{
+	width: 100%;
+	text-align:center;
+}
+.cube{
+	width: 110px;
+	height: 110px;
+	text-align: center;
+	line-height: 70px;
+
+}
+</style>
+</head>
+<body>
+	<div id="container" class="row">
+		<div class="col-xs-3" id="cube_00"></div>
+		<div class="col-xs-3" id="cube_01"></div>
+		<div class="col-xs-3" id="cube_02"></div>
+		<div class="col-xs-3" id="cube_03"></div>
+		<div class="col-xs-3" id="cube_10"></div>
+		<div class="col-xs-3" id="cube_11"></div>
+		<div class="col-xs-3" id="cube_12"></div>
+		<div class="col-xs-3" id="cube_13"></div>
+		<div class="col-xs-3" id="cube_20"></div>
+		<div class="col-xs-3" id="cube_21"></div>
+		<div class="col-xs-3" id="cube_22"></div>
+		<div class="col-xs-3" id="cube_23"></div>
+		<div class="col-xs-3" id="cube_30"></div>
+		<div class="col-xs-3" id="cube_31"></div>
+		<div class="col-xs-3" id="cube_32"></div>
+		<div class="col-xs-3" id="cube_33"></div>
+
+	</div>
+	<div id="buttonArea">
+		<button type="button" onclick="init_2048()">重置</button>
+
+	</div>
+</body>
+
+<script type="text/javascript">
+var displayProto = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+var randomInput = [2,2,4];
+function display_2048(){		//将数组转为div显示
+	for(var i = 0 ; i < 4 ; i++){
+		for (var j = 0 ; j < 4 ; j++){
+			var id_temp = "cube_" + i + j; 
+			var color;
+			switch(displayProto[i][j]){
+							case 0 : color = "#cac0b2";break;
+							case 2 : color = "#eeeeda";break;
+							case 4 : color = "#ece0c8";break;
+							case 8 : color = "#f2b179";break;
+							case 16: color = "#ff8800";break;
+							case 32: color = "#e63f00";break;
+							case 64: color = "#aa0000";break;
+							case 128: color = "#8c0044";break;
+							case 256: color = "#444444";break;
+							case 512: color = "#888800";break;
+							case 1024: color = "#227700";break;
+							case 2048: color = "#00aa00";break;
+							default : color = "black";
+			}
+			if (displayProto[i][j]){
+				document.getElementById(id_temp).innerHTML = "<div class='cube'>" + displayProto[i][j] + "</div>";
+				document.getElementById(id_temp).style.backgroundColor = color;
+			}
+
+			else{
+				document.getElementById(id_temp).innerHTML = "";
+				document.getElementById(id_temp).style.backgroundColor = "#cac0b2";
+			}
+
+		}
+	}
+}
+
+function init_2048(){			//游戏盘重置
+	
+	var init = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+	var a,b;
+	for (var i=0;i<3;i++){
+		a = Math.floor(Math.random()*4) ;
+		b = Math.floor(Math.random()*4) ;
+		if (init[a][b]) i--;
+		else if(i<2)
+			init[a][b] = 2;
+		else 
+			init[a][b] = 4;
+	}
+	displayProto = init;
+	display_2048();
+}
+window.onload = init_2048();
+//向上移动
+function up(){
+	var displayProtoBefore = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+	var flag = 0 ;
+	var combineFlag = 1;
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++)
+			displayProtoBefore[i][j] = displayProto[i][j];
+
+
+	function combine(x){
+		for (var i = 0;i<3;i++){
+		
+			if (displayProto[i][x] && displayProto[i+1][x] && displayProto[i][x] == displayProto[i+1][x] && combineFlag){
+				displayProto[i][x] *= 2;
+				displayProto[i+1][x] = 0;
+				combineFlag = 0;
+			}
+
+
+		}
+	}
+	for (var i = 0;i < 4;i++){
+		if (displayProto[0][i] && displayProto[1][i] && displayProto[2][i] && displayProto[3][i] &&((displayProto[0][i] == displayProto[1][i]&&displayProto[2][i]==displayProto[3][i]) || (displayProto[0][i]==displayProto[1][i] == displayProto[2][i] == displayProto[3][i]))){
+			displayProto[0][i] *= 2;
+			displayProto[1][i] = displayProto[2][i]*2;
+			displayProto[2][i] = 0;
+			displayProto[3][i] = 0;
+			continue; //xxbb|xxxx类情况
+
+		}
+		combineFlag = 1;
+		for (var j = 0;j<4;j++){
+			combine(i);
+			if(displayProto[0][i] == 0){
+				displayProto[0][i] = displayProto[1][i];
+				displayProto[1][i] = displayProto[2][i];
+				displayProto[2][i] = displayProto[3][i];
+				displayProto[3][i] = 0;
+	
+			}
+			else{
+				for (var j = 0;j<4;j++){
+					combine(i);
+					if(displayProto[1][i] == 0){
+						displayProto[1][i] = displayProto[2][i];
+						displayProto[2][i] = displayProto[3][i];
+						displayProto[3][i] = 0;
+				
+					}
+					else{
+						for (var j = 0;j<4;j++){
+							combine(i);
+							if (displayProto[2][i] == 0){
+								displayProto[2][i] = displayProto[3][i];
+								displayProto[3][i] = 0;
+					
+							}
+							else{
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++){
+			if(displayProtoBefore[i][j] != displayProto[i][j])
+				flag = 1;
+		}
+	
+		console.log(displayProto);
+		console.log(displayProtoBefore);
+	function createNewNumber(){
+		if (flag){
+			var i=0;
+			while(i<1){
+				a = Math.floor(Math.random()*4) ;
+				b = Math.floor(Math.random()*4) ;
+				if (displayProto[a][b]) 
+					i=0;
+				else{
+					displayProto[a][b] = randomInput[Math.floor(Math.random()*3)];
+					i=1;
+				}
+			}
+		}
+	}
+	display_2048();	
+	setTimeout(createNewNumber,300);
+	setTimeout(display_2048,300);
+
+}
+function left(){
+	var displayProtoBefore = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+	var flag = 0 ;
+	var combineFlag = 1;
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++)
+			displayProtoBefore[i][j] = displayProto[i][j];
+
+	function combine(x){
+		for (var i = 0;i<3;i++){
+			if (displayProto[x][i] && displayProto[x][i+1] && displayProto[x][i] == displayProto[x][i+1] && combineFlag){
+				displayProto[x][i] *= 2;
+				displayProto[x][i+1] = 0;
+				combineFlag = 0;
+			}
+
+		}
+	}
+	for (var i = 0;i < 4;i++){
+		if (displayProto[i][0] && displayProto[i][1] && displayProto[i][2] && displayProto[i][3] && (displayProto[i][0] == displayProto[i][1]&&displayProto[i][2]==displayProto[i][3] || (displayProto[i][0]==displayProto[i][1] == displayProto[i][2] == displayProto[i][3]))){
+			displayProto[i][0] *= 2;
+			displayProto[i][1] = displayProto[2][i]*2;
+			displayProto[i][2] = 0;
+			displayProto[i][3] = 0;
+			continue;
+
+		}
+		combineFlag = 1;
+		for (var j = 0;j<4;j++){
+			combine(i);
+			if(displayProto[i][0] == 0){
+				displayProto[i][0] = displayProto[i][1];
+				displayProto[i][1] = displayProto[i][2];
+				displayProto[i][2] = displayProto[i][3];
+				displayProto[i][3] = 0;
+	
+			}
+			else{
+				for (var j = 0;j<4;j++){
+					combine(i);
+					if(displayProto[i][1] == 0){
+						displayProto[i][1] = displayProto[i][2];
+						displayProto[i][2] = displayProto[i][3];
+						displayProto[i][3] = 0;
+				
+					}
+					else{
+						for (var j = 0;j<4;j++){
+							combine(i);
+							if (displayProto[i][2] == 0){
+								displayProto[i][2] = displayProto[i][3];
+								displayProto[i][3] = 0;
+					
+							}
+							else{
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++){
+			if(displayProtoBefore[i][j] != displayProto[i][j])
+				flag = 1;
+		}
+	
+		console.log(displayProto);
+		console.log(displayProtoBefore);
+	function createNewNumber(){
+		if (flag){
+			var i=0;
+			while(i<1){
+				a = Math.floor(Math.random()*4) ;
+				b = Math.floor(Math.random()*4) ;
+				if (displayProto[a][b]) 
+					i=0;
+				else{
+					displayProto[a][b] = randomInput[Math.floor(Math.random()*3)];
+					i=1;
+				}
+			}
+		}
+	}
+	display_2048();	
+	setTimeout(createNewNumber,300);
+	setTimeout(display_2048,300);
+
+}
+function down(){
+	var displayProtoBefore = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+	var flag = 0 ;
+	var combineFlag = 1;
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++)
+			displayProtoBefore[i][j] = displayProto[i][j];
+
+	function combine(x){
+		for (var i = 3;i>0;i--){
+			if (displayProto[i][x] && displayProto[i-1][x] && displayProto[i][x] == displayProto[i-1][x] && combineFlag){
+				displayProto[i][x] *= 2;
+				displayProto[i-1][x] = 0;
+				combineFlag = 0;
+			}
+
+		}
+	}
+	for (var i = 0;i < 4;i++){
+		if (displayProto[0][i] && displayProto[1][i] && displayProto[2][i] && displayProto[3][i] && (displayProto[0][i] == displayProto[1][i]&&displayProto[2][i]==displayProto[3][i] || (displayProto[0][i]==displayProto[1][i] == displayProto[2][i] == displayProto[3][i]))){
+			displayProto[3][i] *= 2;
+			displayProto[2][i] = displayProto[2][i]*2;
+			displayProto[1][i] = 0;
+			displayProto[0][i] = 0;
+			continue;
+
+		}
+		combineFlag =1;
+		for (var j = 0;j<4;j++){
+			combine(i);
+			if(displayProto[3][i] == 0){
+				displayProto[3][i] = displayProto[2][i];
+				displayProto[2][i] = displayProto[1][i];
+				displayProto[1][i] = displayProto[0][i];
+				displayProto[0][i] = 0;
+	
+			}
+			else{
+				for (var j = 0;j<4;j++){
+					combine(i);
+					if(displayProto[2][i] == 0){
+						displayProto[2][i] = displayProto[1][i];
+						displayProto[1][i] = displayProto[0][i];
+						displayProto[0][i] = 0;
+				
+					}
+					else{
+						for (var j = 0;j<4;j++){
+							combine(i);
+							if (displayProto[1][i] == 0){
+								displayProto[1][i] = displayProto[0][i];
+								displayProto[0][i] = 0;
+					
+							}
+							else{
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++){
+			if(displayProtoBefore[i][j] != displayProto[i][j])
+				flag = 1;
+		}
+	
+		console.log(displayProto);
+		console.log(displayProtoBefore);
+	function createNewNumber(){
+		if (flag){
+			var i=0;
+			while(i<1){
+				a = Math.floor(Math.random()*4) ;
+				b = Math.floor(Math.random()*4) ;
+				if (displayProto[a][b]) 
+					i=0;
+				else{
+					displayProto[a][b] = randomInput[Math.floor(Math.random()*3)];
+					i=1;
+				}
+			}
+		}
+	}
+	display_2048();	
+	setTimeout(createNewNumber,300);
+	setTimeout(display_2048,300);
+
+}
+
+function right(){
+	var displayProtoBefore = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+	var flag = 0 ;
+	var combineFlag = 1;
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++)
+			displayProtoBefore[i][j] = displayProto[i][j];
+
+	function combine(x){
+		for (var i = 3;i>0;i--){
+			if (displayProto[x][i] && displayProto[x][i-1] && displayProto[x][i] == displayProto[x][i-1] && combineFlag){
+				displayProto[x][i] *= 2;
+				displayProto[x][i-1] = 0;
+				combineFlag = 0;
+			}
+
+		}
+	}
+	for (var i = 0;i < 4;i++){
+		if (displayProto[i][0] && displayProto[i][1] && displayProto[i][2] && displayProto[i][3] && (displayProto[i][0] == displayProto[i][1]&&displayProto[i][2]==displayProto[i][3] || (displayProto[i][0]==displayProto[i][1] == displayProto[i][2] == displayProto[i][3]))){
+			displayProto[i][3] *= 2;
+			displayProto[i][2] = displayProto[2][i]*2;
+			displayProto[i][1] = 0;
+			displayProto[i][0] = 0;
+			continue;
+
+		}
+		combineFlag = 1;
+		for (var j = 0;j<4;j++){
+			combine(i);
+			if(displayProto[i][3] == 0){
+				displayProto[i][3] = displayProto[i][2];
+				displayProto[i][2] = displayProto[i][1];
+				displayProto[i][1] = displayProto[i][0];
+				displayProto[i][0] = 0;
+	
+			}
+			else{
+				for (var j = 0;j<4;j++){
+					combine(i);
+					if(displayProto[i][2] == 0){
+						displayProto[i][2] = displayProto[i][1];
+						displayProto[i][1] = displayProto[i][0];
+						displayProto[i][0] = 0;
+				
+					}
+					else{
+						for (var j = 0;j<4;j++){
+							combine(i);
+							if (displayProto[i][1] == 0){
+								displayProto[i][1] = displayProto[i][0];
+								displayProto[i][0] = 0;
+					
+							}
+							else{
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for (var i = 0;i<4;i++)
+		for (var j = 0;j<4;j++){
+			if(displayProtoBefore[i][j] != displayProto[i][j])
+				flag = 1;
+		}
+	
+		console.log(displayProto);
+		console.log(displayProtoBefore);
+	function createNewNumber(){
+		if (flag){
+			var i=0;
+			while(i<1){
+				a = Math.floor(Math.random()*4) ;
+				b = Math.floor(Math.random()*4) ;
+				if (displayProto[a][b]) 
+					i=0;
+				else{
+					displayProto[a][b] = randomInput[Math.floor(Math.random()*3)];
+					i=1;
+				}
+			}
+		}
+	}
+	display_2048();	
+	setTimeout(createNewNumber,300);
+	setTimeout(display_2048,300);
+
+}
+
+
+//按键映射
+document.onkeydown = function(event){
+	var e = event || window.event || arguments.callee.caller.arguments[0];
+	if (e && e.keyCode == 87)	up();
+	if (e && e.keyCode == 65)	left();
+	if (e && e.keyCode == 83)	down();
+	if (e && e.keyCode == 68)	right();
+}
+
+//bug : 盘满后无法操作
+</script>
+</html>
